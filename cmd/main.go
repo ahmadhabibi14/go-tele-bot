@@ -23,17 +23,43 @@ func main() {
 
 	bot.Debug = true
 
-	updateConfig := tgbotapi.NewUpdate(0)
-	updateConfig.Timeout = 30
+	log.Printf("Authorized on account %s", bot.Self.UserName)
 
-	updates := bot.GetUpdatesChan(updateConfig)
+	u := tgbotapi.NewUpdate(0)
+	u.Timeout = 30000
+
+	updates := bot.GetUpdatesChan(u)
 
 	for update := range updates {
+		// Ignore any non-message updates
 		if update.Message == nil {
 			continue
 		}
 
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
+		if !update.Message.IsCommand() { // Ignore any non-command Messages
+			continue
+		}
+
+		// Create a new MessageConfig. We don't have text yet.
+		// so we leave it empty
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
+
+		// Extract the command from the Message
+		switch update.Message.Command() {
+		case "help":
+			msg.Text = "I understand /sayhi and /status."
+		case "sayhi":
+			msg.Text = "Hi :)"
+		case "status":
+			msg.Text = "I'm ok."
+		default:
+			msg.Text = "I don't know the command"
+		}
+
+		if _, err := bot.Send(msg); err != nil {
+			log.Panic(err)
+		}
+
 		msg.ReplyToMessageID = update.Message.MessageID
 
 		if _, err := bot.Send(msg); err != nil {
