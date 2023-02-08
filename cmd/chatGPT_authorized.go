@@ -46,7 +46,7 @@ func main() {
 
 		// Use the OpenAI API client to generate a response
 		req := gogpt.CompletionRequest{
-			Model:     gogpt.GPT3Ada,
+			Model:     gogpt.GPT3Davinci, /*gogpt.GPT3Ada*/
 			MaxTokens: 5,
 			Prompt:    update.Message.Text,
 		}
